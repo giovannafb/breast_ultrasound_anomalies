@@ -1,3 +1,9 @@
 BUSI_division/
 Dataset_BUSI_with_GT/
 venv
+YOLO_Seg_Dataset/
+runs/
+BUSBRA/
+busbra_birads/
+processed/
+YOLO/

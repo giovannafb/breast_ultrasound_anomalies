@@ -1,0 +1,33 @@
+Meu incrível plano de ação para minha IC de 1 mês!!
+
+Possivelmente incluir novos dataset para validação cruzada ou aumentar dados de treinamento.
+
+Modelos que serão treinados:
+Grupo 1: CNNs Clássicas/Vanilla 
+   - ResNet-50 e EfficientNet-B0
+   
+Grupo 2: 
+   - YOLOv8-cls (Modo Classificação)
+   
+O Grupo 3: O "Golias" (Modelos com Atenção/Transformers)
+   - DETR (Detection Transformer)
+   
+OBS.: O grupo 3 servirá para efeito de comparação. Essas arquiteturas transformers tem embutidas já as estruturas de soft attention, que meio que já fazem um soft masking durante o processamento. No entanto, esse soft masking é realizado pelas próprias redes de maneira dinânimica e portanto é bem mais pesado que uma simples etapa de pré-processamento, que é o que eu to fazendo :)
+   
+Passos de execução:
+
+1. Treinamento com full-images (sem segmentação)
+
+2. Treinamento com hard masking:
+  - Imagens com apenas a segmentação do nódulo (não é máscara binária, o nódulo  ainda terá cor);
+  - Imagens com a segmentação do nódulo + margem ao seu redor, variando o raio da margem considerada;
+  
+3. Treinamento com soft masking:
+Os mesmo passos do treinamento com hard masking serão seguidos para 3 métodos de soft masking diferentes:
+  - Gaussian Blur;
+  - Atenuação por Distância Euclidiana: aplica uma Transformada de Distância. O valor de brilho dos pixels cai gradativamente em um gradiente suave conforme se afastam da borda da segmentação.
+  - Atenuação Escalar de Luminância: Todos os pixels fora da máscara do nódulo são simplesmente multiplicados por um fator escalar c, onde 0 < c < 1 (por exemplo, reduzir o brilho do fundo para 30%). 
+  
+Cereja do bolo, se tiver tempo:
+Um estudo recente apontou o uso conjunto de full-image, cropped nodule e cropped+context como superior no treinamento dos modelos.
+O objetivo então se torna testar os modelos usando as 3 categorias de imagem com hard masking e compará-lo à utilização das mesmas 3 categorias com soft masking.
