@@ -7,3 +7,4 @@ BUSBRA/
 busbra_birads/
 processed/
 YOLO/
+__pycache__/
