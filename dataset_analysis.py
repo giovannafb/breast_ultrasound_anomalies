@@ -9,7 +9,10 @@ import easyocr
 import torch
 from scipy.ndimage import binary_dilation
 
-BASE_DIR = r"C:\Users\Bruno\Documents\Giovanna\breast_ultrasound_anomalies"
+if os.name == 'nt' or os.path.exists(r"C:\Users\Bruno\Documents\Giovanna\breast_ultrasound_anomalies"):
+    BASE_DIR = r"C:\Users\Bruno\Documents\Giovanna\breast_ultrasound_anomalies"
+else:
+    BASE_DIR = "/home/giovanna/Documents/Unifei/IC/Breast_analysis/breast_ultrasound_anomalies"
 BUSBRA_DIR = os.path.join(BASE_DIR, "BUSBRA/BUSBRA")
 IMAGES_DIR = os.path.join(BUSBRA_DIR, "Images")
 MASKS_DIR = os.path.join(BUSBRA_DIR, "Masks")
