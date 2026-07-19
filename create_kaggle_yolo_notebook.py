@@ -38,31 +38,29 @@ MARKDOWN_TITLE = r'''# Treinamento YOLO26n-seg — Segmentação + Classificaç�
 
 > O mecanismo de **self-attention** da YOLO26 busca captar os pontos mais importantes da imagem, complementando (sem substituir) o soft masking do pré-processamento.
 
-> Os resultados são salvos **incrementalmente** em JSON no Google Drive após cada fold. Se o Colab crashar, você não perde o que já treinou.'''
+> Os resultados são salvos localmente em `/kaggle/working/`. Ao final do treinamento, lembre-se de baixar o arquivo gerado (ou os ZIPs de Output) pelo Kaggle.'''
 
 
-CELL_1_DRIVE = r'''# ==============================================================================
-# 1. MONTAR GOOGLE DRIVE E DEFINIR CAMINHOS
+CELL_1_KAGGLE = r'''# ==============================================================================
+# 1. DEFINIR CAMINHOS (KAGGLE)
 # ==============================================================================
-from google.colab import drive
-drive.mount('/content/drive')
-
 import os
 
-# ---- EDITE AQUI se necessário ----
-BASE_DIR = '/content/drive/MyDrive/breast_ultrasound_anomalies'
-# ----------------------------------
+# ---- EDITE AQUI se o nome do seu dataset importado for diferente ----
+BASE_DIR = '/kaggle/input/busbra-dataset' # Substitua 'busbra-dataset' pelo slug que você der no Kaggle
+# -------------------------------------------------------------------
 
 DATASET_CSV = os.path.join(BASE_DIR, 'BUSBRA', 'BUSBRA', 'bus_data.csv')
 IMAGES_DIR  = os.path.join(BASE_DIR, 'BUSBRA', 'BUSBRA', 'Images')
 MASKS_DIR   = os.path.join(BASE_DIR, 'BUSBRA', 'BUSBRA', 'Masks')
-RESULTS_DIR = os.path.join(BASE_DIR, 'results', 'YOLO26_seg')
-TEMP_DIR    = '/content/yolo_folds'  # Armazenamento local (mais rápido)
+
+RESULTS_DIR = '/kaggle/working/results/YOLO26_seg'
+TEMP_DIR    = '/kaggle/working/yolo_folds'
 
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # Verificação rápida
-assert os.path.exists(DATASET_CSV), f"CSV não encontrado: {DATASET_CSV}"
+assert os.path.exists(DATASET_CSV), f"CSV não encontrado: {DATASET_CSV}\n(Lembre-se de importar o dataset BUSBRA no Kaggle com o path correto)"
 assert os.path.isdir(IMAGES_DIR),   f"Diretório de imagens não encontrado: {IMAGES_DIR}"
 assert os.path.isdir(MASKS_DIR),    f"Diretório de máscaras não encontrado: {MASKS_DIR}"
 print(f"✅ CSV: {DATASET_CSV}")
@@ -724,47 +722,6 @@ df_summary.to_csv(summary_path, index=False)
 print(f"\n💾 Resumo salvo em: {summary_path}")'''
 
 
-CELL_10_CHECK_FINISH = r'''# ==============================================================================
-# 10. VERIFICAÇÃO DE TÉRMINO E REINÍCIO AUTOMÁTICO
-# ==============================================================================
-import os
-import json
-import time
-from google.colab import runtime
-from IPython.display import display, Javascript
-
-results_json_path = os.path.join(RESULTS_DIR, 'all_fold_results.json')
-total_expected_runs = len(SEEDS) * N_SPLITS
-
-if os.path.exists(results_json_path):
-    with open(results_json_path, 'r') as f:
-        all_results = json.load(f)
-    completed_runs = len(all_results)
-else:
-    completed_runs = 0
-
-print(f"Runs completados: {completed_runs}/{total_expected_runs}")
-
-if completed_runs >= total_expected_runs:
-    print("✅ Treinamento 100% concluído! Desconectando a sessão para economizar créditos...")
-    time.sleep(2)
-    runtime.unassign()
-else:
-    print("⚠️ Treinamento incompleto. Reiniciando a execução de todas as células para continuar de onde parou...")
-    time.sleep(2)
-    display(Javascript("""
-        // Aciona o atalho 'Run All' do Colab (Ctrl+F9 / Cmd+F9)
-        document.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'F9',
-            code: 'F9',
-            keyCode: 120,
-            ctrlKey: true,
-            metaKey: true,
-            bubbles: true
-        }));
-    """))'''
-
-
 # =============================================================================
 # NOTEBOOK ASSEMBLY
 # =============================================================================
@@ -784,7 +741,7 @@ def make_yolo26_seg_notebook():
 
     nb['cells'] = [
         nbf.v4.new_markdown_cell(MARKDOWN_TITLE),
-        nbf.v4.new_code_cell(CELL_1_DRIVE),
+        nbf.v4.new_code_cell(CELL_1_KAGGLE),
         nbf.v4.new_code_cell(CELL_2_IMPORTS),
         nbf.v4.new_code_cell(CELL_3_CONFIG),
         nbf.v4.new_code_cell(CELL_4_FUNCTIONS),
@@ -793,7 +750,6 @@ def make_yolo26_seg_notebook():
         nbf.v4.new_code_cell(CELL_7_RESULTS_TABLE),
         nbf.v4.new_code_cell(CELL_8_VISUALIZATIONS),
         nbf.v4.new_code_cell(CELL_9_BOOTSTRAP_CI),
-        nbf.v4.new_code_cell(CELL_10_CHECK_FINISH),
     ]
 
     return nb
@@ -801,7 +757,7 @@ def make_yolo26_seg_notebook():
 
 if __name__ == '__main__':
     nb = make_yolo26_seg_notebook()
-    with open('YOLO26_Seg_Training.ipynb', 'w') as f:
+    with open('YOLO26_Seg_Training_Kaggle.ipynb', 'w') as f:
         nbf.write(nb, f)
-    print("✅ YOLO26_Seg_Training.ipynb gerado com sucesso!")
-    print("   → Faça upload para o Google Colab e execute com GPU habilitada.")
+    print("✅ YOLO26_Seg_Training_Kaggle.ipynb gerado com sucesso!")
+    print("   → Faça upload deste notebook para o Kaggle, adicione o Dataset do BUSBRA e ative uma GPU.")
